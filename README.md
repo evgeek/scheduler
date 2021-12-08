@@ -14,7 +14,7 @@ use Doctrine\DBAL\DriverManager;
 use Evgeek\Scheduler\Scheduler;
 use Evgeek\Scheduler\Handler\DatabaseLogging;
 
-require_once __DIR__ . '/path/to/vendor/autoload.php';
+require_once '/path/to/vendor/autoload.php';
 
 //Create DBAL connector
 $uri = 'mysql://user:secret@localhost/mydb';
