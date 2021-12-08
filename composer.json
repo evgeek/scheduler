@@ -1,0 +1,35 @@
+{
+  "name": "evgeek/scheduler",
+  "description": "Simple scheduler",
+  "keywords": ["scheduler", "cron"],
+  "homepage": "https://github.com/evgeek/scheduler",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Eugene Ivanov",
+      "email": "evgeeek@gmail.com",
+      "homepage": "https://github.com/evgeek"
+    }
+  ],
+  "require": {
+    "php": ">=7.2",
+    "psr/log": "^1.1",
+    "nesbot/carbon": "2.54.*",
+    "doctrine/dbal": "3.1.*",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Evgeek\\Scheduler\\": "src"
+    }
+  }
+}
