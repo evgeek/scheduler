@@ -155,7 +155,7 @@ $scheduler = new Scheduler($handler, $config);
 ### Handlers
 Lock handler, implements ```\Evgeek\Scheduler\Handler\LockHandlerInterface```. So far, only one is available.
 * ```\Evgeek\Scheduler\Handler\DatabaseLogging```\
-Stores locks in the database with tasks information in one table and a full launch log in another. Needs configured [Doctrine DBAL](https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/introduction.html) object as first parameter of constructor. You can pass custom task table name to the second optional parameter, and table name to the third.
+Stores locks in the database with tasks information in one table and a full launch log in another. Needs configured [Doctrine DBAL](https://github.com/doctrine/dbal) object as first parameter of constructor. You can pass custom task table name to the second optional parameter, and table name to the third.
 ### Config
 Allows you to configure other scheduling options. You can do this using ```Config``` constructor parameters or using ```$config``` methods:
 #### Logger
