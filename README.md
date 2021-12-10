@@ -199,10 +199,7 @@ $handler = new \Evgeek\Scheduler\Handler\DatabaseLogging(
 );
 
 //Creates and setup config
-$config = new \Evgeek\Scheduler\Config();
-$config
-    ->setDebugLogging(true)
-    ->setDefaultTries(3);
+$config = new \Evgeek\Scheduler\Config(true, true, new Logger());
 
 //Creates scheduler with handler and (optional) config
 $scheduler = new Scheduler($handler, $config);
@@ -219,25 +216,25 @@ Lock handler, implements ```\Evgeek\Scheduler\Handler\LockHandlerInterface```. S
 
 ### Config
 
-Allows you to configure other scheduling options. You can do this using ```Config``` constructor parameters or
-using ```$config``` methods:
+Allows you to configure other scheduling options. You can do this using ```Config``` constructor parameters (```Config```
+object is immutable). Constructor parameters are of the following types:
 
 #### Logger
 
 The scheduler has two log channels: ```debug``` for getting detailed launch information and ```error``` for task errors.
 Methods for configure:
 
-* ```setDebugLogging()``` (default ```false```) - enable/disable ```debug``` channel.
-* ```setErrorLogging()``` (default ```true```) - enable/disable ```error``` channel.
-* ```setLogger()``` (default ```null```) - set [PSR-3](https://www.php-fig.org/psr/psr-3/) compatible logger. If
+* ```$debugLogging``` (default ```false```) - enable/disable ```debug``` channel.
+* ```$errorLogging``` (default ```true```) - enable/disable ```error``` channel.
+* ```$logger``` (default ```null```) - set [PSR-3](https://www.php-fig.org/psr/psr-3/) compatible logger. If
   passed ```null```, log will be sent to ```STDOUT```/```STDERR```.
-* ```setDebugLogLevel()``` (default ```null```) - sets custom log level for the PSR-3 logger for ```debug``` messages.
-  By default, this is ```debug```.
-* ```setDErrorLogLevel()``` (default ```null```) - sets custom log level for the PSR-3 logger for ```error``` messages.
-  By default, this is ```error```.
-* ```setLogUncaughtErrors()``` (default ```false```) - registers shutdown function for log uncaught exceptions such as
-  PHP fatal errors or incorrect task settings.
-* ```setLogMessageFormat()``` (default ```"[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"```) - formatting
+* ```$debugLogLevel``` (default ```null```) - sets custom log level for the PSR-3 logger for ```debug``` messages. By
+  default, this is ```debug```.
+* ```$errorLogLevel``` (default ```null```) - sets custom log level for the PSR-3 logger for ```error``` messages. By
+  default, this is ```error```.
+* ```$logUncaughtErrors``` (default ```false```) - registers shutdown function for log uncaught exceptions such as PHP
+  fatal errors or incorrect task settings.
+* ```$logMessageFormat``` (default ```"[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"```) - formatting
   template for task logger. Available variables:
     * ```{{task_id}}```
     * ```{{task_type}}```
@@ -249,11 +246,12 @@ Methods for configure:
     * ```{{task_description}}```
     * ```{{TASK_DESCRIPTION}}```
 
-Lowercase for regular case, uppercase - for forced uppercase. Log message example with default formatting:
+Lowercase for regular case, uppercase - for forced uppercase. Log message example with default formatting (don't forgot
+create ```Config``` with ```$debugLogging = true```):
 
 ```php
 /* ... */
-$config->setDebugLogging(true);
+$config = new \Evgeek\Scheduler\Config(true);
 /* ... */
 $scheduler->task('ls -la')
     ->schedule()
@@ -267,22 +265,22 @@ $scheduler->task('ls -la')
 [0. COMMAND 'ls -la']: Completed in 00s
 ```
 
-* ```setCommandOutput()``` (default ```false```) - enable/disable shell output for `bash command` tasks.
+* ```$commandOutput``` (default ```false```) - enable/disable shell output for `bash command` tasks.
 
 #### Default task options
 
 Some options for setting default task options. The parameters specified in the task overwrite the default values.
 
-* ```setDefaultPreventOverlapping()``` (default ```false```) - if true, the task cannot start if another instance of
-  this task is currently running.
-* ```setDefaultLockResetTimeout()``` (default ```360```) - how long (in minutes) the task lock should be recognized as
+* ```$defaultPreventOverlapping``` (default ```false```) - if true, the task cannot start if another instance of this
+  task is currently running.
+* ```$defaultLockResetTimeout``` (default ```360```) - how long (in minutes) the task lock should be recognized as
   frozen and reset.
-* ```setDefaultTries()``` (default ```1```) - how many attempts to complete the task should be made in case of an error.
-* ```setDefaultTryDelay()``` (default ```0```) - how long (in minutes) to wait before retrying the failed task.
+* ```$defaultTries``` (default ```1```) - how many attempts to complete the task should be made in case of an error.
+* ```$defaultTryDelay``` (default ```0```) - how long (in minutes) to wait before retrying the failed task.
 
 #### Others
 
-* ```setMinimumIntervalLength()``` (default ```30```) - Minimum interval size in minutes (for task
+* ```$minimumIntervalLength``` (default ```30```) - Minimum interval size in minutes (for task
   method ```addInterval()```). Currently, tasks are started sequentially and synchronously, so the scheduler cannot
   guarantee the exact time when the task will start. Because of this, I had to limit the minimum size of the interval to
   make sure that the task will not be missed because the interval is too small. This is not a good decision. In future

@@ -3,11 +3,37 @@
 namespace Evgeek\Scheduler\Wrapper;
 
 use Evgeek\Scheduler\Config;
+use Psr\Log\LoggerInterface;
 
 class LoggerWrapper
 {
-    /** @var Config */
-    private $config;
+    /**
+     * PSR-3 is a compatible logger. If null - the log will be sent to the stdout/stderr.
+     * @var ?LoggerInterface
+     */
+    private $logger;
+    /**
+     * If true, a debug log will be written.
+     * The logging method is defined by the $logger parameter of the constructor
+     * @var bool
+     */
+    private $debugLogging;
+    /**
+     * If true, an error log will be written.
+     * The logging method is defined by the $logger parameter of the constructor
+     * @var bool
+     */
+    private $errorLogging;
+    /**
+     * Log level for information/debug messages (DEBUG by default).
+     * @var mixed
+     */
+    private $debugLogLevel;
+    /**
+     * Log level for error messages (ERROR by default).
+     * @var mixed
+     */
+    private $errorLogLevel;
 
     /**
      * Wrapper around PSR-3 logger and scheduler config.
@@ -17,7 +43,11 @@ class LoggerWrapper
      */
     public function __construct(Config $config)
     {
-        $this->config = $config;
+        $this->logger = $config->getLogger();
+        $this->debugLogging = $config->getDebugLogging();
+        $this->errorLogging = $config->getErrorLogging();
+        $this->debugLogLevel = $config->getDebugLogLevel();
+        $this->errorLogLevel = $config->getErrorLogLevel();
     }
 
     /**
@@ -26,22 +56,20 @@ class LoggerWrapper
      */
     public function debug(string $message): void
     {
-        if (!$this->config->getDebugLogging()) {
+        if (!$this->debugLogging) {
             return;
         }
 
-        $logger = $this->config->getLogger();
-        if ($logger === null) {
+        if ($this->logger === null) {
             $stdout = fopen('php://stdout', 'wb');
             fwrite($stdout, $message . PHP_EOL);
             fclose($stdout);
             return;
         }
 
-        $logLevel = $this->config->getDebugLogLevel();
-        $logLevel === null ?
-            $logger->debug($message) :
-            $logger->log($logLevel, $message);
+        $this->debugLogLevel === null ?
+            $this->logger->debug($message) :
+            $this->logger->log($this->debugLogLevel, $message);
     }
 
     /**
@@ -50,21 +78,19 @@ class LoggerWrapper
      */
     public function error(string $message): void
     {
-        if (!$this->config->getErrorLogging()) {
+        if (!$this->errorLogging) {
             return;
         }
 
-        $logger = $this->config->getLogger();
-        if ($logger === null) {
+        if ($this->logger === null) {
             $stdout = fopen('php://stderr', 'wb');
             fwrite($stdout, $message . PHP_EOL);
             fclose($stdout);
             return;
         }
 
-        $logLevel = $this->config->getErrorLogLevel();
-        $logLevel === null ?
-            $logger->error($message) :
-            $logger->log($logLevel, $message);
+        $this->errorLogLevel === null ?
+            $this->logger->error($message) :
+            $this->logger->log($this->errorLogLevel, $message);
     }
 }
