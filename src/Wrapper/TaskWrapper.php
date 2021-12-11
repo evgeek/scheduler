@@ -9,7 +9,7 @@ use Evgeek\Scheduler\Constant\PhpErrors;
 use Evgeek\Scheduler\Task\TaskInterface;
 use Evgeek\Scheduler\Constant\Mode;
 use Evgeek\Scheduler\Tools\Cron;
-use Evgeek\Scheduler\Tools\ExceptionTools;
+use Evgeek\Scheduler\Tools\Formatter;
 use Evgeek\Scheduler\Tools\Time;
 use Exception;
 use Throwable;
@@ -202,7 +202,7 @@ class TaskWrapper
             $this->handler->completeLaunchSuccessfully($launchId);
             $this->logDebug("Completed in " . Time::diffString($startTime));
         } catch (Throwable $e) {
-            $message = ExceptionTools::format($e);
+            $message = Formatter::exception($this->config->getLogExceptionFormat(), $e);
             $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
             if ($errors < $this->tries) {
                 sleep($this->tryDelay);
@@ -526,6 +526,8 @@ class TaskWrapper
         $isError ?
             $this->log->error($formattedMessage) :
             $this->log->debug($formattedMessage);
+
+//        $this->log->
     }
 
     /**

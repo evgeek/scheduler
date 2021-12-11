@@ -33,9 +33,21 @@ class Config
      * Available variables: {{task_id}}, {{task_type}}, {{TASK_TYPE}}, {{task_name}}, {{TASK_NAME}},
      * {{message}}, {{MESSAGE}}, {{task_description}}, {{TASK_DESCRIPTION}}.
      * Lowercase for regular case, uppercase - for forced uppercase.
+     * Default format: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
      * @var string
      */
     private $logMessageFormat;
+    /**
+     * Mapping specific exceptions to PSR-3 log channels (class => level).
+     * @var array
+     */
+    private $exceptionLogMatching;
+    /**
+     * Exception formatting string. Available variables: {{code}}, {{message}}, {{class}} and {{stacktrace}}.
+     * Default format: "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
+     * @var string
+     */
+    private $logExceptionFormat;
     /**
      * If true, output from bash command tasks will be sent to stdout. Otherwise, it will be suppressed.
      * @var bool
@@ -83,8 +95,13 @@ class Config
      * @param mixed $debugLog False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
      * @param mixed $errorLog False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
      * @param bool $logUncaughtErrors Registers shutdown function for logging PHP runtime fatal errors
-     * @param string $logMessageFormat Log message formatting string. Available task_id, task_type, task_name, message
-     *                  and task_description variables. Lowercase for regular case, uppercase - for forced uppercase.
+     * @param ?string $logMessageFormat Log message formatting string. Available {{task_id}}, {{task_type}}, {{task_name}},
+     *      {{message}} and {{task_description}} variables. Lowercase for regular case, uppercase - for forced uppercase.
+     *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
+     * @param ?array $exceptionLogMatching Mapping specific exceptions to PSR-3 log channels (class => level).
+     * @param ?string $logExceptionFormat Exception formatting string. Available {{code}}, {{message}}, {{class}}
+     *      and {{stacktrace}} variables. Pass null for default formatting:
+     *      "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
      * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched
      * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks)
      * @param int $defaultTries The number of attempts to execute the task in case of an error
@@ -98,7 +115,9 @@ class Config
                         $debugLog = false,
                         $errorLog = true,
         bool            $logUncaughtErrors = false,
-        string          $logMessageFormat = "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}",
+        ?string         $logMessageFormat = null,
+        ?array          $exceptionLogMatching = [],
+        ?string         $logExceptionFormat = null,
         bool            $commandOutput = false,
         bool            $defaultPreventOverlapping = false,
         int             $defaultLockResetTimeout = 360,
@@ -111,7 +130,10 @@ class Config
         $this->debugLog = $debugLog;
         $this->errorLog = $errorLog;
         $this->logUncaughtErrors = $logUncaughtErrors;
-        $this->logMessageFormat = $logMessageFormat;
+        $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
+        $this->exceptionLogMatching = $exceptionLogMatching ?? [];
+        $this->logExceptionFormat = $logExceptionFormat ?? '[code]: {{code}}' . PHP_EOL . '[message]: {{message}}' .
+            PHP_EOL . '[class]: {{class}}' . PHP_EOL . '[stacktrace]:' . PHP_EOL . '{{stacktrace}}';
         $this->commandOutput = $commandOutput;
         $this->defaultPreventOverlapping = $defaultPreventOverlapping;
 
@@ -150,9 +172,9 @@ class Config
     /**
      * False/null - debug log disabled. True - enabled (DEBUG for PSR-3 logger, or STDOUT, if logger not set).
      * Or you can set custom PSR-3  log level for debug messages.
-     * @return bool
+     * @return mixed
      */
-    public function getDebugLog(): bool
+    public function getDebugLog()
     {
         return $this->debugLog;
     }
@@ -160,9 +182,9 @@ class Config
     /**
      * False/null - error log disabled. True - enabled (ERROR for PSR-3 logger, or STDERR, if logger not set).
      * Or you can set custom PSR-3  log level for error messages.
-     * @return bool
+     * @return mixed
      */
-    public function getErrorLog(): bool
+    public function getErrorLog()
     {
         return $this->errorLog;
     }
@@ -181,11 +203,31 @@ class Config
      * Available variables: {{task_id}}, {{task_type}}, {{TASK_TYPE}}, {{task_name}}, {{TASK_NAME}},
      * {{message}}, {{MESSAGE}}, {{task_description}}, {{TASK_DESCRIPTION}}.
      * Lowercase for regular case, uppercase - for forced uppercase.
+     * Default format: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
      * @return string
      */
     public function getLogMessageFormat(): string
     {
         return $this->logMessageFormat;
+    }
+
+    /**
+     * Mapping specific exceptions to PSR-3 log channels (class => level).
+     * @return array
+     */
+    public function getExceptionLogMatching(): array
+    {
+        return $this->exceptionLogMatching;
+    }
+
+    /**
+     * Exception formatting string. Available variables: {{code}}, {{message}}, {{class}} and {{stacktrace}}.
+     * Default format: "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
+     * @return string
+     */
+    public function getLogExceptionFormat(): string
+    {
+        return $this->logExceptionFormat;
     }
 
     /**

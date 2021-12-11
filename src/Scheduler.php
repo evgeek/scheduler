@@ -11,7 +11,7 @@ use Evgeek\Scheduler\Task\TaskFromClosure;
 use Evgeek\Scheduler\Task\TaskFromFile;
 use Evgeek\Scheduler\Task\TaskFromCommand;
 use Evgeek\Scheduler\Task\TaskInterface;
-use Evgeek\Scheduler\Tools\ExceptionTools;
+use Evgeek\Scheduler\Tools\Formatter;
 use Evgeek\Scheduler\Tools\Time;
 use Evgeek\Scheduler\Wrapper\LoggerWrapper;
 use Evgeek\Scheduler\Wrapper\TaskWrapper;
@@ -61,7 +61,8 @@ class Scheduler
             try {
                 $task->dispatch();
             } catch (Throwable $e) {
-                $task->logError("Can't be started" . PHP_EOL . ExceptionTools::format($e));
+                $task->logError("Can't be started" . PHP_EOL .
+                    Formatter::exception($this->config->getLogExceptionFormat(), $e));
             }
         }
         $this->log->debug('[Scheduler]: Completed in ' . Time::diffString($startTime));
