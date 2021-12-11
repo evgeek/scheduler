@@ -202,13 +202,14 @@ class TaskWrapper
             $this->handler->completeLaunchSuccessfully($launchId);
             $this->logDebug("Completed in " . Time::diffString($startTime));
         } catch (Throwable $e) {
-            $message = Formatter::exception($this->config->getLogExceptionFormat(), $e);
+            $header = "Failed in " . Time::diffString($startTime);
+            $message = Formatter::exception($this->config->getLogExceptionFormat(), $header, $e);
             $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
             if ($errors < $this->tries) {
                 sleep($this->tryDelay);
                 $this->launchTask($startTime, $launchId, ++$errors);
             } else {
-                $this->logError("Failed in " . Time::diffString($startTime) . PHP_EOL . $message);
+                $this->logError($header, $e);
             }
         }
     }
@@ -483,20 +484,24 @@ class TaskWrapper
 
     /**
      * Log message to error channel
-     * @param string $message
+     * @param string $header
+     * @param Throwable $e
      */
-    public function logError(string $message): void
+    public function logError(string $header, Throwable $e): void
     {
-        $this->log($message, true);
+        $this->log($header, $e);
     }
 
     /**
      * Log message wrapper
      * @param string $message
-     * @param bool $isError
+     * @param Throwable|null $e
      */
-    private function log(string $message, bool $isError = false): void
+    private function log(string $message, ?Throwable $e = null): void
     {
+        if ($e !== null) {
+            $message = Formatter::exception($this->config->getLogExceptionFormat(), $message, $e);
+        }
         $formattedMessage = Formatter::logMessage(
             $this->config->getLogMessageFormat(),
             $this->taskId,
@@ -506,9 +511,10 @@ class TaskWrapper
             $this->description
         );
 
-        $isError ?
-            $this->log->error($formattedMessage) :
-            $this->log->debug($formattedMessage);
+        $e === null ?
+            $this->log->debug($formattedMessage) :
+            $this->log->error($formattedMessage, $e);
+
     }
 
     /**

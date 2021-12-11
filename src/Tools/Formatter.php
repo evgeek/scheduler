@@ -10,18 +10,21 @@ class Formatter
      * Formatting Exceptions
      *
      * @param string $format
+     * @param string $header
      * @param Throwable $e
      * @return string
      */
-    public static function exception(string $format, Throwable $e): string
+    public static function exception(string $format, string $header, Throwable $e): string
     {
         $placeholders = [
+            '{{header}}',
             '{{code}}',
             '{{message}}',
             '{{class}}',
             '{{stacktrace}}',
         ];
         $values = [
+            $header,
             $e->getCode(),
             $e->getMessage(),
             get_class($e),

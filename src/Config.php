@@ -43,8 +43,8 @@ class Config
      */
     private $exceptionLogMatching;
     /**
-     * Exception formatting string. Available variables: {{code}}, {{message}}, {{class}} and {{stacktrace}}.
-     * Default format: "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
+     * Exception formatting string. Available variables: {{header}}, {{code}}, {{message}}, {{class}} and {{stacktrace}}.
+     * Default format: "{{header}}\n[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
      * @var string
      */
     private $logExceptionFormat;
@@ -99,9 +99,9 @@ class Config
      *      {{message}} and {{task_description}} variables. Lowercase for regular case, uppercase - for forced uppercase.
      *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
      * @param ?array $exceptionLogMatching Mapping specific exceptions to PSR-3 log channels (class => level).
-     * @param ?string $logExceptionFormat Exception formatting string. Available {{code}}, {{message}}, {{class}}
-     *      and {{stacktrace}} variables. Pass null for default formatting:
-     *      "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
+     * @param ?string $logExceptionFormat Exception formatting string. Available {{header}}, {{code}}, {{message}},
+     *      {{class}} and {{stacktrace}} variables. Pass null for default formatting:
+     *      "{{header}}\n[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
      * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched
      * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks)
      * @param int $defaultTries The number of attempts to execute the task in case of an error
@@ -132,8 +132,8 @@ class Config
         $this->logUncaughtErrors = $logUncaughtErrors;
         $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
         $this->exceptionLogMatching = $exceptionLogMatching ?? [];
-        $this->logExceptionFormat = $logExceptionFormat ?? '[code]: {{code}}' . PHP_EOL . '[message]: {{message}}' .
-            PHP_EOL . '[class]: {{class}}' . PHP_EOL . '[stacktrace]:' . PHP_EOL . '{{stacktrace}}';
+        $this->logExceptionFormat = $logExceptionFormat ?? '{{header}}' . PHP_EOL . '[code]: {{code}}' . PHP_EOL .
+            '[message]: {{message}}' . PHP_EOL . '[class]: {{class}}' . PHP_EOL . '[stacktrace]:' . PHP_EOL . '{{stacktrace}}';
         $this->commandOutput = $commandOutput;
         $this->defaultPreventOverlapping = $defaultPreventOverlapping;
 
@@ -221,8 +221,8 @@ class Config
     }
 
     /**
-     * Exception formatting string. Available variables: {{code}}, {{message}}, {{class}} and {{stacktrace}}.
-     * Default format: "[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
+     * Exception formatting string. Available variables: {{header}}, {{code}}, {{message}}, {{class}} and {{stacktrace}}.
+     * Default format: "{{header}}\n[code]: {{code}}\n[message]: {{message}}\n[class]: {{class}}\n[stacktrace]:\n{{stacktrace}}"
      * @return string
      */
     public function getLogExceptionFormat(): string

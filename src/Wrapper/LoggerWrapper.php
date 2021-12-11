@@ -4,6 +4,7 @@ namespace Evgeek\Scheduler\Wrapper;
 
 use Evgeek\Scheduler\Config;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 class LoggerWrapper
 {
@@ -22,6 +23,11 @@ class LoggerWrapper
      * @var bool
      */
     private $errorLog;
+    /**
+     * Mapping specific exceptions to PSR-3 log channels (class => level).
+     * @var array
+     */
+    private $exceptionLogMatching;
 
     /**
      * Wrapper around PSR-3 logger and scheduler config.
@@ -34,6 +40,7 @@ class LoggerWrapper
         $this->logger = $config->getLogger();
         $this->debugLog = $config->getDebugLog();
         $this->errorLog = $config->getErrorLog();
+        $this->exceptionLogMatching = $config->getExceptionLogMatching();
     }
 
     /**
@@ -61,8 +68,9 @@ class LoggerWrapper
     /**
      * Write error message
      * @param string $message
+     * @param Throwable|null $e
      */
-    public function error(string $message): void
+    public function error(string $message, ?Throwable $e = null): void
     {
         if ($this->errorLog === false || $this->errorLog === null) {
             return;
@@ -73,6 +81,14 @@ class LoggerWrapper
             fwrite($stream, $message . PHP_EOL);
             fclose($stream);
             return;
+        }
+
+        if ($e !== null) {
+            $matchedLogLevel = $this->exceptionLogMatching[get_class($e)] ?? null;
+            if ($matchedLogLevel !== null) {
+                $this->logger->log($matchedLogLevel, $message);
+                return;
+            }
         }
 
         $this->errorLog === true ?

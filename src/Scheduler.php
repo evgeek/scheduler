@@ -11,7 +11,6 @@ use Evgeek\Scheduler\Task\TaskFromClosure;
 use Evgeek\Scheduler\Task\TaskFromFile;
 use Evgeek\Scheduler\Task\TaskFromCommand;
 use Evgeek\Scheduler\Task\TaskInterface;
-use Evgeek\Scheduler\Tools\Formatter;
 use Evgeek\Scheduler\Tools\Time;
 use Evgeek\Scheduler\Wrapper\LoggerWrapper;
 use Evgeek\Scheduler\Wrapper\TaskWrapper;
@@ -61,8 +60,7 @@ class Scheduler
             try {
                 $task->dispatch();
             } catch (Throwable $e) {
-                $task->logError("Can't be started" . PHP_EOL .
-                    Formatter::exception($this->config->getLogExceptionFormat(), $e));
+                $task->logError("Can't be started", $e);
             }
         }
         $this->log->debug('[Scheduler]: Completed in ' . Time::diffString($startTime));
@@ -155,7 +153,8 @@ class Scheduler
                 if ($this->run === true) {
                     $message = "[Scheduler]: ATTENTION: Scheduler crashed due to PHP " . PhpErrors::FATAL[$code] .
                         " error (code $code). " . PHP_EOL . "Check the lock status of the task - in this situation, " .
-                        "the Scheduler cannot release it automatically before Lock Reset Timeout has expired." . PHP_EOL . $message;
+                        "the Scheduler cannot release it automatically before Lock Reset Timeout has expired." .
+                        PHP_EOL . $message;
                 } else {
                     $message = "[Scheduler]: Uncaught error" . PHP_EOL . $message;
                 }
