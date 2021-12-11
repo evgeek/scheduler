@@ -135,7 +135,7 @@ $scheduler->task(new Job())
     ->daysOfWeek([7]);
 ```
 
-* Once on 1st January and December and every Monday and Wednesday in January and December
+* Once on 1st January and 1st December, and every Monday and Wednesday in January and December
 
 ```php
 $scheduler->task(new Job())
@@ -199,7 +199,7 @@ $handler = new \Evgeek\Scheduler\Handler\DatabaseLogging(
 );
 
 //Creates and setup config
-$config = new \Evgeek\Scheduler\Config(true, true, new Logger());
+$config = new \Evgeek\Scheduler\Config(new Logger(), true);
 
 //Creates scheduler with handler and (optional) config
 $scheduler = new Scheduler($handler, $config);
@@ -216,7 +216,8 @@ Lock handler, implements ```\Evgeek\Scheduler\Handler\LockHandlerInterface```. S
 
 ### Config
 
-Allows you to configure other scheduling options. You can do this using ```Config``` constructor parameters (```Config```
+Allows you to configure other scheduling options. You can do this using ```Config``` constructor
+parameters (```Config```
 object is immutable). Constructor parameters are of the following types:
 
 #### Logger
@@ -224,18 +225,20 @@ object is immutable). Constructor parameters are of the following types:
 The scheduler has two log channels: ```debug``` for getting detailed launch information and ```error``` for task errors.
 Methods for configure:
 
-* ```$debugLogging``` (default ```false```) - enable/disable ```debug``` channel.
-* ```$errorLogging``` (default ```true```) - enable/disable ```error``` channel.
 * ```$logger``` (default ```null```) - set [PSR-3](https://www.php-fig.org/psr/psr-3/) compatible logger. If
   passed ```null```, log will be sent to ```STDOUT```/```STDERR```.
-* ```$debugLogLevel``` (default ```null```) - sets custom log level for the PSR-3 logger for ```debug``` messages. By
-  default, this is ```debug```.
-* ```$errorLogLevel``` (default ```null```) - sets custom log level for the PSR-3 logger for ```error``` messages. By
-  default, this is ```error```.
+* ```$debugLog``` (default ```false```) - if ```null```/```false``` - debug messages from the scheduler will be
+  disabled. If ```true``` - enabled, with PSR-3 logger messages will be sent to the ```DEBUG``` level, without -
+  to ```STDOUT```. And you can pass custom log level (like ```$debugLog = Logger::INFO```) to change the default PSR-3
+  channel.
+* ```$errorLog``` (default ```true```) - if ```null```/```false``` - error messages from the scheduler and tasks will be
+  disabled. If ```true``` - enabled, with PSR-3 logger messages will be sent to the ```ERROR``` level, without -
+  to ```STDERR```. And you can pass custom log level (like ```$debugLog = Logger::WARNING```) to change the default
+  PSR-3 channel.
 * ```$logUncaughtErrors``` (default ```false```) - registers shutdown function for log uncaught exceptions such as PHP
   fatal errors or incorrect task settings.
-* ```$logMessageFormat``` (default ```"[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"```) - formatting
-  template for task logger. Available variables:
+* ```$logMessageFormat``` (default ```null```) - formatting template for task logger. Pass ```null``` for set default
+  formatting (```"[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"```). Available variables:
     * ```{{task_id}}```
     * ```{{task_type}}```
     * ```{{TASK_TYPE}}```
@@ -246,12 +249,12 @@ Methods for configure:
     * ```{{task_description}}```
     * ```{{TASK_DESCRIPTION}}```
 
-Lowercase for regular case, uppercase - for forced uppercase. Log message example with default formatting (don't forgot
-create ```Config``` with ```$debugLogging = true```):
+Lowercase for regular case, uppercase - for forced uppercase. Debug log message example with default formatting (don't
+forgot create ```Config``` with enabled ```$debugLog```):
 
 ```php
 /* ... */
-$config = new \Evgeek\Scheduler\Config(true);
+$config = new \Evgeek\Scheduler\Config(null, true);
 /* ... */
 $scheduler->task('ls -la')
     ->schedule()
@@ -264,6 +267,30 @@ $scheduler->task('ls -la')
 [0. COMMAND 'ls -la']: Launched (try 1/3)
 [0. COMMAND 'ls -la']: Completed in 00s
 ```
+
+* ```$exceptionLogMatching``` (default ```[]```) - for more complex exceptions handling. You can pass an array of
+  mapping to select the logging level for a specific exception:
+
+```php
+$exceptionLogMatching = [
+    AbstractException::class => Logger::WARNING,
+    SoftException::class => Logger::NOTICE,
+    FatalException::class => Logger::CRITICAL,    
+];
+```
+
+First, the mapping goes according to a specific class, then - according to the parents, from top to bottom. Therefore,
+place more abstract errors below.
+
+* ```$logExceptionFormat``` (default ```null```) - formatting template for logging exceptions (```{{message}}``` part of
+  the ```$logMessageFormat``` parameter). Pass ```null``` for set default formatting
+  (```"{{header}}\n[code]: {{code}}\n[exception]: {{class}}\n[message]: {{message}}\n[stacktrace]:\n{{stacktrace}}"```).
+  Available variables:
+    * ``{{header}}`` - accompanying message
+    * ``{{code}}`` - ```$e->getCode()```
+    * ``{{class}}`` - class of exception
+    * ``{{message}}``
+    * ``{{stacktrace}}``
 
 * ```$commandOutput``` (default ```false```) - enable/disable shell output for `bash command` tasks.
 
