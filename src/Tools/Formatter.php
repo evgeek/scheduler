@@ -19,15 +19,15 @@ class Formatter
         $placeholders = [
             '{{header}}',
             '{{code}}',
-            '{{message}}',
             '{{class}}',
+            '{{message}}',
             '{{stacktrace}}',
         ];
         $values = [
             $header,
             $e->getCode(),
-            $e->getMessage(),
             get_class($e),
+            $e->getMessage(),
             $e->getTraceAsString(),
         ];
 
