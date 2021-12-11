@@ -84,7 +84,7 @@ class LoggerWrapper
         }
 
         if ($e !== null) {
-            $matchedLogLevel = $this->exceptionLogMatching[get_class($e)] ?? null;
+            $matchedLogLevel = $this->getMatchedLogLevel($e);
             if ($matchedLogLevel !== null) {
                 $this->logger->log($matchedLogLevel, $message);
                 return;
@@ -94,5 +94,25 @@ class LoggerWrapper
         $this->errorLog === true ?
             $this->logger->error($message) :
             $this->logger->log($this->errorLog, $message);
+    }
+
+    /**
+     * @param Throwable $e
+     * @return mixed|null
+     */
+    private function getMatchedLogLevel(Throwable $e)
+    {
+        $class = get_class($e);
+        if (array_key_exists($class, $this->exceptionLogMatching)) {
+            return $this->exceptionLogMatching[$class];
+        }
+
+        foreach ($this->exceptionLogMatching as $class => $code) {
+            if ($e instanceof $class) {
+                return $code;
+            }
+        }
+
+        return null;
     }
 }
