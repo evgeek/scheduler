@@ -9,32 +9,20 @@ use Psr\Log\LoggerInterface;
 class Config
 {
     /**
-     * If true, a debug log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
-     * @var bool
-     */
-    private $debugLogging;
-    /**
-     * If true, an error log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
-     * @var bool
-     */
-    private $errorLogging;
-    /**
-     * PSR-3 is a compatible logger. If null - the log will be sent to the stdout/stderr.
+     * PSR-3 is a compatible logger. If null - the log will be sent to the STDOUT/STDERR.
      * @var ?LoggerInterface
      */
     private $logger;
     /**
-     * Log level for information/debug messages (DEBUG by default).
+     * False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
      * @var mixed
      */
-    private $debugLogLevel;
+    private $debugLog;
     /**
-     * Log level for error messages (ERROR by default).
+     * False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
      * @var mixed
      */
-    private $errorLogLevel;
+    private $errorLog;
     /**
      * Registers shutdown function for logging PHP runtime fatal errors that the scheduler cannot catch
      * @var bool
@@ -91,11 +79,9 @@ class Config
 
     /**
      * Configure default scheduler parameters
-     * @param bool $debugLogging If true, a debug log will be written.
-     * @param bool $errorLogging If true, an error log will be written.
-     * @param ?LoggerInterface $logger PSR-3 is a compatible logger. If null - the log will be sent to the stdout/stderr.
-     * @param mixed $debugLogLevel Log level for information/debug messages (DEBUG by default).
-     * @param mixed $errorLogLevel Log level for error messages (ERROR by default).
+     * @param ?LoggerInterface $logger PSR-3 is a compatible logger. If null - the log will be sent to the STDOUT/STDERR.
+     * @param mixed $debugLog False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
+     * @param mixed $errorLog False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
      * @param bool $logUncaughtErrors Registers shutdown function for logging PHP runtime fatal errors
      * @param string $logMessageFormat Log message formatting string. Available task_id, task_type, task_name, message
      *                  and task_description variables. Lowercase for regular case, uppercase - for forced uppercase.
@@ -108,11 +94,9 @@ class Config
      * @throws Exception
      */
     public function __construct(
-        bool            $debugLogging = false,
-        bool            $errorLogging = true,
         LoggerInterface $logger = null,
-                        $debugLogLevel = null,
-                        $errorLogLevel = null,
+                        $debugLog = false,
+                        $errorLog = true,
         bool            $logUncaughtErrors = false,
         string          $logMessageFormat = "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}",
         bool            $commandOutput = false,
@@ -123,11 +107,9 @@ class Config
         int             $minimumIntervalLength = 30
     )
     {
-        $this->debugLogging = $debugLogging;
-        $this->errorLogging = $errorLogging;
         $this->logger = $logger;
-        $this->debugLogLevel = $debugLogLevel;
-        $this->errorLogLevel = $errorLogLevel;
+        $this->debugLog = $debugLog;
+        $this->errorLog = $errorLog;
         $this->logUncaughtErrors = $logUncaughtErrors;
         $this->logMessageFormat = $logMessageFormat;
         $this->commandOutput = $commandOutput;
@@ -157,26 +139,6 @@ class Config
     }
 
     /**
-     * If true, a debug log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
-     * @return bool
-     */
-    public function getDebugLogging(): bool
-    {
-        return $this->debugLogging;
-    }
-
-    /**
-     * If true, an error log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
-     * @return bool
-     */
-    public function getErrorLogging(): bool
-    {
-        return $this->errorLogging;
-    }
-
-    /**
      * PSR-3 is a compatible logger. If null - the log will be sent to the stdout/stderr.
      * @return LoggerInterface|null
      */
@@ -186,21 +148,23 @@ class Config
     }
 
     /**
-     *  Log level for information/debug messages (DEBUG by default).
-     * @return mixed
+     * False/null - debug log disabled. True - enabled (DEBUG for PSR-3 logger, or STDOUT, if logger not set).
+     * Or you can set custom PSR-3  log level for debug messages.
+     * @return bool
      */
-    public function getDebugLogLevel()
+    public function getDebugLog(): bool
     {
-        return $this->debugLogLevel;
+        return $this->debugLog;
     }
 
     /**
-     * Log level for error messages (ERROR by default).
-     * @return mixed
+     * False/null - error log disabled. True - enabled (ERROR for PSR-3 logger, or STDERR, if logger not set).
+     * Or you can set custom PSR-3  log level for error messages.
+     * @return bool
      */
-    public function getErrorLogLevel()
+    public function getErrorLog(): bool
     {
-        return $this->errorLogLevel;
+        return $this->errorLog;
     }
 
     /**

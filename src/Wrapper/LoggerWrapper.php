@@ -13,27 +13,15 @@ class LoggerWrapper
      */
     private $logger;
     /**
-     * If true, a debug log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
+     * False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
      * @var bool
      */
-    private $debugLogging;
+    private $debugLog;
     /**
-     * If true, an error log will be written.
-     * The logging method is defined by the $logger parameter of the constructor
+     * False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
      * @var bool
      */
-    private $errorLogging;
-    /**
-     * Log level for information/debug messages (DEBUG by default).
-     * @var mixed
-     */
-    private $debugLogLevel;
-    /**
-     * Log level for error messages (ERROR by default).
-     * @var mixed
-     */
-    private $errorLogLevel;
+    private $errorLog;
 
     /**
      * Wrapper around PSR-3 logger and scheduler config.
@@ -44,10 +32,8 @@ class LoggerWrapper
     public function __construct(Config $config)
     {
         $this->logger = $config->getLogger();
-        $this->debugLogging = $config->getDebugLogging();
-        $this->errorLogging = $config->getErrorLogging();
-        $this->debugLogLevel = $config->getDebugLogLevel();
-        $this->errorLogLevel = $config->getErrorLogLevel();
+        $this->debugLog = $config->getDebugLog();
+        $this->errorLog = $config->getErrorLog();
     }
 
     /**
@@ -56,20 +42,20 @@ class LoggerWrapper
      */
     public function debug(string $message): void
     {
-        if (!$this->debugLogging) {
+        if ($this->debugLog === false || $this->debugLog === null) {
             return;
         }
 
         if ($this->logger === null) {
-            $stdout = fopen('php://stdout', 'wb');
-            fwrite($stdout, $message . PHP_EOL);
-            fclose($stdout);
+            $stream = fopen('php://stdout', 'wb');
+            fwrite($stream, $message . PHP_EOL);
+            fclose($stream);
             return;
         }
 
-        $this->debugLogLevel === null ?
+        $this->debugLog === true ?
             $this->logger->debug($message) :
-            $this->logger->log($this->debugLogLevel, $message);
+            $this->logger->log($this->debugLog, $message);
     }
 
     /**
@@ -78,19 +64,19 @@ class LoggerWrapper
      */
     public function error(string $message): void
     {
-        if (!$this->errorLogging) {
+        if ($this->errorLog === false || $this->errorLog === null) {
             return;
         }
 
         if ($this->logger === null) {
-            $stdout = fopen('php://stderr', 'wb');
-            fwrite($stdout, $message . PHP_EOL);
-            fclose($stdout);
+            $stream = fopen('php://stderr', 'wb');
+            fwrite($stream, $message . PHP_EOL);
+            fclose($stream);
             return;
         }
 
-        $this->errorLogLevel === null ?
+        $this->errorLog === true ?
             $this->logger->error($message) :
-            $this->logger->log($this->errorLogLevel, $message);
+            $this->logger->log($this->errorLog, $message);
     }
 }
