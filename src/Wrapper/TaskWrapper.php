@@ -497,37 +497,18 @@ class TaskWrapper
      */
     private function log(string $message, bool $isError = false): void
     {
-        $taskType = $this->task->getType();
-        $placeholders = [
-            '{{task_id}}',
-            '{{TASK_ID}}',
-            '{{task_type}}',
-            '{{TASK_TYPE}}',
-            '{{task_name}}',
-            '{{TASK_NAME}}',
-            '{{message}}',
-            '{{MESSAGE}}',
-            '{{task_description}}',
-            '{{TASK_DESCRIPTION}}'
-        ];
-        $values = [
+        $formattedMessage = Formatter::logMessage(
+            $this->config->getLogMessageFormat(),
             $this->taskId,
-            $this->taskId,
-            $taskType,
-            strtoupper($taskType),
+            $this->task->getType(),
             $this->name,
-            strtoupper($this->name),
             $message,
-            strtoupper($message),
-            $this->description,
-            strtoupper($this->description)
-        ];
-        $formattedMessage = str_replace($placeholders, $values, $this->config->getLogMessageFormat());
+            $this->description
+        );
+
         $isError ?
             $this->log->error($formattedMessage) :
             $this->log->debug($formattedMessage);
-
-//        $this->log->
     }
 
     /**
