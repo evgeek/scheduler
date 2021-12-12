@@ -273,9 +273,9 @@ $scheduler->task('ls -la')
 
 ```php
 $exceptionLogMatching = [
-    AbstractException::class => Logger::WARNING,
     SoftException::class => Logger::NOTICE,
     FatalException::class => Logger::CRITICAL,    
+    AbstractException::class => Logger::WARNING,
 ];
 ```
 
