@@ -10,16 +10,16 @@ class Formatter
      * Formatting Exceptions
      *
      * @param string $format
-     * @param int|null $messageLimit
+     * @param int|null $msgLengthLimit
      * @param string $header
      * @param Throwable $e
      * @return string
      */
-    public static function exception(string $format, ?int $messageLimit, string $header, Throwable $e): string
+    public static function exception(string $format, ?int $msgLengthLimit, string $header, Throwable $e): string
     {
-        $message = $messageLimit === null ?
+        $message = $msgLengthLimit === null ?
             $e->getMessage() :
-            static::truncateString($e->getMessage(), $messageLimit);
+            static::truncateString($e->getMessage(), $msgLengthLimit);
 
         $placeholders = [
             '{{header}}',
@@ -43,7 +43,7 @@ class Formatter
      * Formatting log messages
      *
      * @param string $format
-     * @param int|null $messageLimit
+     * @param int|null $msgLengthLimit
      * @param int|null $taskId
      * @param string $taskType
      * @param string $name
@@ -53,7 +53,7 @@ class Formatter
      */
     public static function logMessage(
         string $format,
-        ?int   $messageLimit,
+        ?int   $msgLengthLimit,
         ?int   $taskId,
         string $taskType,
         string $name,
@@ -89,9 +89,9 @@ class Formatter
         /** @var string $message */
         $message = str_replace($placeholders, $values, $format);
 
-        return $messageLimit === null ?
+        return $msgLengthLimit === null ?
             $message :
-            static::truncateString($message, $messageLimit);
+            static::truncateString($message, $msgLengthLimit);
     }
 
     /**
