@@ -203,7 +203,12 @@ class TaskWrapper
             $this->logDebug("Completed in " . Time::diffString($startTime));
         } catch (Throwable $e) {
             $header = "Failed in " . Time::diffString($startTime);
-            $message = Formatter::exception($this->config->getLogExceptionFormat(), $header, $e);
+            $message = Formatter::exception(
+                $this->config->getLogExceptionFormat(),
+                $this->config->getMaxExceptionMsgLength(),
+                $header,
+                $e
+            );
             $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
             if ($errors < $this->tries) {
                 sleep($this->tryDelay);
@@ -500,10 +505,16 @@ class TaskWrapper
     private function log(string $message, ?Throwable $e = null): void
     {
         if ($e !== null) {
-            $message = Formatter::exception($this->config->getLogExceptionFormat(), $message, $e);
+            $message = Formatter::exception(
+                $this->config->getLogExceptionFormat(),
+                $this->config->getMaxExceptionMsgLength(),
+                $message,
+                $e
+            );
         }
         $formattedMessage = Formatter::logMessage(
             $this->config->getLogMessageFormat(),
+            $this->config->getMaxLogMsgLength(),
             $this->taskId,
             $this->task->getType(),
             $this->name,

@@ -38,6 +38,11 @@ class Config
      */
     private $logMessageFormat;
     /**
+     * The maximum length of the log message (the longer one will be truncated). Set null for disable truncation
+     * @var ?int
+     */
+    private $maxLogMsgLength;
+    /**
      * Mapping specific exceptions to PSR-3 log channels (class => level).
      * @var array
      */
@@ -48,6 +53,11 @@ class Config
      * @var string
      */
     private $logExceptionFormat;
+    /**
+     * The maximum length of the exception message (the longer one will be truncated). Set null for disable truncation
+     * @var bool
+     */
+    private $maxExceptionMsgLength;
     /**
      * If true, output from bash command tasks will be sent to stdout. Otherwise, it will be suppressed.
      * @var bool
@@ -98,10 +108,12 @@ class Config
      * @param ?string $logMessageFormat Log message formatting string. Available {{task_id}}, {{task_type}}, {{task_name}},
      *      {{message}} and {{task_description}} variables. Lowercase for regular case, uppercase - for forced uppercase.
      *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
+     * @param ?int $maxLogMsgLength The maximum length of the log message (the longer one will be truncated)
      * @param ?array $exceptionLogMatching Mapping specific exceptions to PSR-3 log channels (class => level).
      * @param ?string $logExceptionFormat Exception formatting string. Available {{header}}, {{code}}, {{class}},
      *      {{message}} and {{stacktrace}} variables. Pass null for default formatting:
      *      "{{header}}\n[code]: {{code}}\n[exception]: {{class}}\n[message]: {{message}}\n[stacktrace]:\n{{stacktrace}}"
+     * @param ?int $maxExceptionMsgLength The maximum length of the exception message (the longer one will be truncated)
      * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched
      * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks)
      * @param int $defaultTries The number of attempts to execute the task in case of an error
@@ -116,8 +128,10 @@ class Config
                         $errorLog = true,
         bool            $logUncaughtErrors = false,
         ?string         $logMessageFormat = null,
+        ?int            $maxLogMsgLength = null,
         ?array          $exceptionLogMatching = [],
         ?string         $logExceptionFormat = null,
+        ?int            $maxExceptionMsgLength = null,
         bool            $commandOutput = false,
         bool            $defaultPreventOverlapping = false,
         int             $defaultLockResetTimeout = 360,
@@ -131,9 +145,21 @@ class Config
         $this->errorLog = $errorLog;
         $this->logUncaughtErrors = $logUncaughtErrors;
         $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
+
+        if ($maxLogMsgLength !== null || $maxLogMsgLength <= 0) {
+            throw new Exception('The maximum length of a log message must be greater than zero.');
+        }
+        $this->maxLogMsgLength = $maxLogMsgLength;
+
         $this->exceptionLogMatching = $exceptionLogMatching ?? [];
         $this->logExceptionFormat = $logExceptionFormat ?? '{{header}}' . PHP_EOL . '[code]: {{code}}' . PHP_EOL .
             '[exception]: {{class}}' . PHP_EOL . '[message]: {{message}}' . PHP_EOL . '[stacktrace]:' . PHP_EOL . '{{stacktrace}}';
+
+        if ($maxExceptionMsgLength !== null || $maxExceptionMsgLength <= 0) {
+            throw new Exception('The maximum length of an exception message must be greater than zero.');
+        }
+        $this->maxExceptionMsgLength = $maxExceptionMsgLength;
+
         $this->commandOutput = $commandOutput;
         $this->defaultPreventOverlapping = $defaultPreventOverlapping;
 
@@ -212,6 +238,15 @@ class Config
     }
 
     /**
+     * The maximum length of the log message (the longer one will be truncated). Set null for disable truncation
+     * @return int|null
+     */
+    public function getMaxLogMsgLength(): ?int
+    {
+        return $this->maxLogMsgLength;
+    }
+
+    /**
      * Mapping specific exceptions to PSR-3 log channels (class => level).
      * @return array
      */
@@ -228,6 +263,15 @@ class Config
     public function getLogExceptionFormat(): string
     {
         return $this->logExceptionFormat;
+    }
+
+    /**
+     * The maximum length of the exception message (the longer one will be truncated). Set null for disable truncation
+     * @return int|null
+     */
+    public function getMaxExceptionMsgLength(): ?int
+    {
+        return $this->maxExceptionMsgLength;
     }
 
     /**
