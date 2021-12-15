@@ -248,9 +248,8 @@ Methods for configure:
     * ```{{MESSAGE}}```
     * ```{{task_description}}```
     * ```{{TASK_DESCRIPTION}}```
-
-Lowercase for regular case, uppercase - for forced uppercase. Debug log message example with default formatting (don't
-forgot create ```Config``` with enabled ```$debugLog```):
+      Lowercase for regular case, uppercase - for forced uppercase. Debug log message example with default formatting (
+      don't forgot create ```Config``` with enabled ```$debugLog```):
 
 ```php
 /* ... */
@@ -267,6 +266,9 @@ $scheduler->task('ls -la')
 [0. COMMAND 'ls -la']: Launched (try 1/3)
 [0. COMMAND 'ls -la']: Completed in 00s
 ```
+
+* ```$maxLogMsgLength``` (default ```null```) - the maximum length of the log message (the longer one will be truncated)
+  . Set null for disable truncation. Useful if some logging channel does not accept too long messages.
 
 * ```$exceptionLogMatching``` (default ```[]```) - for more complex exceptions handling. You can pass an array of
   mapping to select the logging level for a specific exception:
@@ -291,6 +293,11 @@ place more abstract errors below.
     * ``{{class}}`` - class of exception
     * ``{{message}}``
     * ``{{stacktrace}}``
+
+* ```$maxExceptionMsgLength``` (default ```null```) - the maximum length of the exception message (the longer one will
+  be truncated)
+  . Set null for disable truncation. Useful with ```$maxLogMsgLength``` if your exceptions messages are too long, and
+  you don't want to truncate the stacktrace.
 
 * ```$commandOutput``` (default ```false```) - enable/disable shell output for `bash command` tasks.
 
