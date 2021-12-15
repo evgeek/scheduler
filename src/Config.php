@@ -146,7 +146,7 @@ class Config
         $this->logUncaughtErrors = $logUncaughtErrors;
         $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
 
-        if ($maxLogMsgLength !== null || $maxLogMsgLength <= 0) {
+        if ($maxLogMsgLength !== null && $maxLogMsgLength <= 0) {
             throw new Exception('The maximum length of a log message must be greater than zero.');
         }
         $this->maxLogMsgLength = $maxLogMsgLength;
@@ -155,7 +155,7 @@ class Config
         $this->logExceptionFormat = $logExceptionFormat ?? '{{header}}' . PHP_EOL . '[code]: {{code}}' . PHP_EOL .
             '[exception]: {{class}}' . PHP_EOL . '[message]: {{message}}' . PHP_EOL . '[stacktrace]:' . PHP_EOL . '{{stacktrace}}';
 
-        if ($maxExceptionMsgLength !== null || $maxExceptionMsgLength <= 0) {
+        if ($maxExceptionMsgLength !== null && $maxExceptionMsgLength <= 0) {
             throw new Exception('The maximum length of an exception message must be greater than zero.');
         }
         $this->maxExceptionMsgLength = $maxExceptionMsgLength;
