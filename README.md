@@ -235,10 +235,10 @@ Methods for configure:
   disabled. If ```true``` - enabled, with PSR-3 logger messages will be sent to the ```ERROR``` level, without -
   to ```STDERR```. And you can pass custom log level (like ```$debugLog = Logger::WARNING```) to change the default
   PSR-3 channel.
-* ```$logUncaughtErrors``` (default ```false```) - registers shutdown function for log uncaught exceptions such as PHP
-  fatal errors or incorrect task settings.
-* ```$logPhpWarningsToError``` (default ```false```) - If true, PHP non-fatal warnings will be sent to the error
-  channel, otherwise to the debug channel.
+* ```$logUncaughtErrors``` (default ```false```) - registers shutdown function for log uncaught errors such as PHP
+  errors or incorrect task settings.
+* ```$logWarningsToError``` (default ```false```) - ff true, PHP non-fatal errors will be sent to the error channel,
+  otherwise - to the debug channel.
 * ```$logMessageFormat``` (default ```null```) - formatting template for task logger. Pass ```null``` for set default
   formatting (```"[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"```). Available variables:
     * ```{{task_id}}```

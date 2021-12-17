@@ -501,7 +501,7 @@ class TaskWrapper
 
     /**
      * Log message to error channel
-     * @param string $header
+     * @param string $message
      * @param Throwable|null $e
      */
     public function logError(string $message, ?Throwable $e = null): void
@@ -544,9 +544,9 @@ class TaskWrapper
         if (array_key_exists($code, PhpErrors::FATAL)) {
             $errName = PhpErrors::FATAL[$code];
             throw new Exception("(ATTENTION: PHP $errName) - $message", $code);
-        } else {
+        } elseif ($this->config->getLogUncaughtErrors()) {
             $message = (PhpErrors::SOFT[$code] ?? 0) . " - $message (code $code, file $file, line $line)";
-            $this->config->getLogPhpWarningsToError() ?
+            $this->config->getLogWarningsToError() ?
                 $this->logError($message) :
                 $this->logDebug($message);
 

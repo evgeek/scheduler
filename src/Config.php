@@ -24,15 +24,15 @@ class Config
      */
     private $errorLog;
     /**
-     * Registers shutdown function for logging PHP runtime fatal errors that the scheduler cannot catch
+     * Registers shutdown function for logging PHP errors
      * @var bool
      */
     private $logUncaughtErrors;
     /**
-     * If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel
+     * If true, PHP non-fatal errors will be sent to the error channel, otherwise - to the debug channel
      * @var bool
      */
-    private $logPhpWarningsToError;
+    private $logWarningsToError;
     /**
      * Log message formatting string.
      * Available variables: {{task_id}}, {{task_type}}, {{TASK_TYPE}}, {{task_name}}, {{TASK_NAME}},
@@ -109,8 +109,8 @@ class Config
      * @param ?LoggerInterface $logger PSR-3 is a compatible logger. If null - the log will be sent to the STDOUT/STDERR.
      * @param mixed $debugLog False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
      * @param mixed $errorLog False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
-     * @param bool $logUncaughtErrors Registers shutdown function for logging PHP runtime fatal errors.
-     * @param bool $logPhpWarningsToError If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel.
+     * @param bool $logUncaughtErrors Registers shutdown function for logging PHP errors.
+     * @param bool $logWarningsToError If true, PHP non-fatal errors will be sent to the error channel, otherwise - to the debug channel
      * @param ?string $logMessageFormat Log message formatting string. Available {{task_id}}, {{task_type}}, {{task_name}},
      *      {{message}} and {{task_description}} variables. Lowercase for regular case, uppercase - for forced uppercase.
      *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}".
@@ -133,7 +133,7 @@ class Config
                         $debugLog = false,
                         $errorLog = true,
         bool            $logUncaughtErrors = false,
-        bool            $logPhpWarningsToError = false,
+        bool            $logWarningsToError = false,
         ?string         $logMessageFormat = null,
         ?int            $maxLogMsgLength = null,
         ?array          $exceptionLogMatching = [],
@@ -151,7 +151,7 @@ class Config
         $this->debugLog = $debugLog;
         $this->errorLog = $errorLog;
         $this->logUncaughtErrors = $logUncaughtErrors;
-        $this->logPhpWarningsToError = $logPhpWarningsToError;
+        $this->logWarningsToError = $logWarningsToError;
         $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
 
         if ($maxLogMsgLength !== null && $maxLogMsgLength <= 0) {
@@ -224,7 +224,7 @@ class Config
     }
 
     /**
-     * Registers shutdown function for logging PHP runtime fatal errors that the scheduler cannot catch
+     * Registers shutdown function for logging PHP errors
      * @return bool
      */
     public function getLogUncaughtErrors(): bool
@@ -233,12 +233,12 @@ class Config
     }
 
     /**
-     * If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel
+     * If true, PHP non-fatal errors will be sent to the error channel, otherwise - to the debug channel
      * @return bool
      */
-    public function getLogPhpWarningsToError(): bool
+    public function getLogWarningsToError(): bool
     {
-        return $this->logPhpWarningsToError;
+        return $this->logWarningsToError;
     }
 
     /**
