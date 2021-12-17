@@ -29,6 +29,11 @@ class Config
      */
     private $logUncaughtErrors;
     /**
+     * If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel
+     * @var bool
+     */
+    private $logPhpWarningsToError;
+    /**
      * Log message formatting string.
      * Available variables: {{task_id}}, {{task_type}}, {{TASK_TYPE}}, {{task_name}}, {{TASK_NAME}},
      * {{message}}, {{MESSAGE}}, {{task_description}}, {{TASK_DESCRIPTION}}.
@@ -104,20 +109,21 @@ class Config
      * @param ?LoggerInterface $logger PSR-3 is a compatible logger. If null - the log will be sent to the STDOUT/STDERR.
      * @param mixed $debugLog False/null - debug log disabled. True - enabled (STDOUT/DEBUG). Or set custom PSR-3 level.
      * @param mixed $errorLog False/null - error log disabled. True - enabled (STDERR/ERROR). Or set custom PSR-3 level.
-     * @param bool $logUncaughtErrors Registers shutdown function for logging PHP runtime fatal errors
+     * @param bool $logUncaughtErrors Registers shutdown function for logging PHP runtime fatal errors.
+     * @param bool $logPhpWarningsToError If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel.
      * @param ?string $logMessageFormat Log message formatting string. Available {{task_id}}, {{task_type}}, {{task_name}},
      *      {{message}} and {{task_description}} variables. Lowercase for regular case, uppercase - for forced uppercase.
-     *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}"
+     *      Pass null for default formatting: "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}".
      * @param ?int $maxLogMsgLength The maximum length of the log message (the longer one will be truncated)
      * @param ?array $exceptionLogMatching Mapping specific exceptions to PSR-3 log channels (class => level).
      * @param ?string $logExceptionFormat Exception formatting string. Available {{header}}, {{code}}, {{class}},
      *      {{message}} and {{stacktrace}} variables. Pass null for default formatting:
-     *      "{{header}}\n[code]: {{code}}\n[exception]: {{class}}\n[message]: {{message}}\n[stacktrace]:\n{{stacktrace}}"
-     * @param ?int $maxExceptionMsgLength The maximum length of the exception message (the longer one will be truncated)
-     * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched
-     * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks)
-     * @param int $defaultTries The number of attempts to execute the task in case of an error
-     * @param int $defaultTryDelay Delay before new try
+     *      "{{header}}\n[code]: {{code}}\n[exception]: {{class}}\n[message]: {{message}}\n[stacktrace]:\n{{stacktrace}}".
+     * @param ?int $maxExceptionMsgLength The maximum length of the exception message (the longer one will be truncated).
+     * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched.
+     * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks).
+     * @param int $defaultTries The number of attempts to execute the task in case of an error.
+     * @param int $defaultTryDelay Delay before new try.
      * @param int $minimumIntervalLength Minimum interval in minutes for task's addInterval method.
      *                                   ATTENTION: a low value can cause to skipped tasks, change at your own risk.
      * @throws Exception
@@ -127,6 +133,7 @@ class Config
                         $debugLog = false,
                         $errorLog = true,
         bool            $logUncaughtErrors = false,
+        bool            $logPhpWarningsToError = false,
         ?string         $logMessageFormat = null,
         ?int            $maxLogMsgLength = null,
         ?array          $exceptionLogMatching = [],
@@ -144,6 +151,7 @@ class Config
         $this->debugLog = $debugLog;
         $this->errorLog = $errorLog;
         $this->logUncaughtErrors = $logUncaughtErrors;
+        $this->logPhpWarningsToError = $logPhpWarningsToError;
         $this->logMessageFormat = $logMessageFormat ?? "[{{task_id}}. {{TASK_TYPE}} '{{task_name}}']: {{message}}";
 
         if ($maxLogMsgLength !== null && $maxLogMsgLength <= 0) {
@@ -222,6 +230,15 @@ class Config
     public function getLogUncaughtErrors(): bool
     {
         return $this->logUncaughtErrors;
+    }
+
+    /**
+     * If true, PHP warnings will be sent to the error channel, otherwise - to the debug channel
+     * @return bool
+     */
+    public function getLogPhpWarningsToError(): bool
+    {
+        return $this->logPhpWarningsToError;
     }
 
     /**

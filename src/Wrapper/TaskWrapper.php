@@ -50,6 +50,9 @@ class TaskWrapper
     /** @var LoggerWrapper */
     private $log;
 
+    /** @var ?string */
+    private $oldErrorHandler;
+
     /**
      * Task wrapper containing the scheduler parameters and launch logic.
      * @param LockHandlerInterface $handler
@@ -182,11 +185,10 @@ class TaskWrapper
      */
     private function launchTask(Carbon $startTime, int $launchId = null, int $try = 1): void
     {
-        set_error_handler(
+        $this->oldErrorHandler = set_error_handler(
             function ($code, $message, $file, $line) {
-                $this->phpFatalHandler($code, $message, $file, $line);
-            },
-            PhpErrors::fatalMask()
+                $this->phpErrorHandler($code, $message, $file, $line);
+            }
         );
 
         if ($launchId === null) {
@@ -484,34 +486,6 @@ class TaskWrapper
      */
     public function logDebug(string $message): void
     {
-        $this->log($message);
-    }
-
-    /**
-     * Log message to error channel
-     * @param string $header
-     * @param Throwable $e
-     */
-    public function logError(string $header, Throwable $e): void
-    {
-        $this->log($header, $e);
-    }
-
-    /**
-     * Log message wrapper
-     * @param string $message
-     * @param Throwable|null $e
-     */
-    private function log(string $message, ?Throwable $e = null): void
-    {
-        if ($e !== null) {
-            $message = Formatter::exception(
-                $this->config->getLogExceptionFormat(),
-                $this->config->getMaxExceptionMsgLength(),
-                $message,
-                $e
-            );
-        }
         $formattedMessage = Formatter::logMessage(
             $this->config->getLogMessageFormat(),
             $this->config->getMaxLogMsgLength(),
@@ -522,10 +496,36 @@ class TaskWrapper
             $this->description
         );
 
-        $e === null ?
-            $this->log->debug($formattedMessage) :
-            $this->log->error($formattedMessage, $e);
+        $this->log->debug($formattedMessage);
+    }
 
+    /**
+     * Log message to error channel
+     * @param string $header
+     * @param Throwable|null $e
+     */
+    public function logError(string $message, ?Throwable $e = null): void
+    {
+        if ($e !== null) {
+            $message = Formatter::exception(
+                $this->config->getLogExceptionFormat(),
+                $this->config->getMaxExceptionMsgLength(),
+                $message,
+                $e
+            );
+        }
+
+        $formattedMessage = Formatter::logMessage(
+            $this->config->getLogMessageFormat(),
+            $this->config->getMaxLogMsgLength(),
+            $this->taskId,
+            $this->task->getType(),
+            $this->name,
+            $message,
+            $this->description
+        );
+
+        $this->log->error($formattedMessage, $e);
     }
 
     /**
@@ -535,9 +535,21 @@ class TaskWrapper
      * @param $line
      * @throws Exception
      */
-    private function phpFatalHandler($code, $message, $file, $line): void
+    private function phpErrorHandler($code, $message, $file, $line): void
     {
-        $errName = PhpErrors::FATAL[$code];
-        throw new Exception("(ATTENTION: PHP $errName) - $message", $code);
+        if ($this->oldErrorHandler !== null) {
+            call_user_func($this->oldErrorHandler, $code, $message, $file, $line);
+        }
+
+        if (array_key_exists($code, PhpErrors::FATAL)) {
+            $errName = PhpErrors::FATAL[$code];
+            throw new Exception("(ATTENTION: PHP $errName) - $message", $code);
+        } else {
+            $message = (PhpErrors::SOFT[$code] ?? 0) . " - $message (code $code, file $file, line $line)";
+            $this->config->getLogPhpWarningsToError() ?
+                $this->logError($message) :
+                $this->logDebug($message);
+
+        }
     }
 }
