@@ -141,7 +141,7 @@ class TaskWrapper
         $this->logDebug("The previous launch is still running (already $runtime min)");
 
         if ($runtime >= $this->lockResetTimeout) {
-            $this->logDebug("The current runtime is bigger than the reset timeout ($this->lockResetTimeout min). Reset lock");
+            $this->logError("The current runtime is bigger than the reset timeout ($this->lockResetTimeout min). Reset lock");
             $this->handler->resetLock($lastLaunch->id);
             $this->launchTask($startTime);
             return;
