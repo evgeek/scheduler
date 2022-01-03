@@ -204,7 +204,7 @@ class TaskWrapper
             $this->handler->completeLaunchSuccessfully($launchId);
             $this->logDebug("Completed in " . Time::diffString($startTime));
         } catch (Throwable $e) {
-            $header = "Failed in " . Time::diffString($startTime);
+            $header = "Failed (try $try/$this->tries) in " . Time::diffString($startTime);
             $message = Formatter::exception(
                 $this->config->getLogExceptionFormat(),
                 $this->config->getMaxExceptionMsgLength(),
@@ -217,6 +217,7 @@ class TaskWrapper
                 sleep($this->tryDelay);
                 $this->launchTask($startTime, $launchId, ++$errors);
             } else {
+                $header = "Failed in " . Time::diffString($startTime);
                 $this->logError($header, $e);
             }
         }
