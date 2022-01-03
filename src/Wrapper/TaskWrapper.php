@@ -213,6 +213,7 @@ class TaskWrapper
             );
             $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
             if ($errors < $this->tries) {
+                $this->logDebug($message);
                 sleep($this->tryDelay);
                 $this->launchTask($startTime, $launchId, ++$errors);
             } else {
