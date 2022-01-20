@@ -316,6 +316,8 @@ Some options for setting default task options. The parameters specified in the t
 
 #### Others
 
+* `$restartImmediately` (default `false`) - If true, the failed task will be restarted without delay for Every/Delay
+  modes, and at the same interval for Single mode (but only at the correct interval).
 * ```$minimumIntervalLength``` (default ```30```) - Minimum interval size in minutes (for task
   method ```addInterval()```). Currently, tasks are started sequentially and synchronously, so the scheduler cannot
   guarantee the exact time when the task will start. Because of this, I had to limit the minimum size of the interval to

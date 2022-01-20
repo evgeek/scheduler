@@ -91,6 +91,12 @@ class Config
      */
     private $defaultTryDelay;
     /**
+     * If true, the failed task will be restarted without delay for Every/Delay modes,
+     *  and at the same interval for Single mode (but only at the correct interval)
+     * @var bool
+     */
+    private $restartImmediately;
+    /**
      * Minimum interval in minutes for task's addInterval method. It is made due to the fact that the scheduler
      * does not guarantee the start of the task at the exact time, and too small interval can lead to a missed task launch.
      * ATTENTION: use reducing limitation of the interval consciously, at your own risk.
@@ -120,10 +126,12 @@ class Config
      *      {{message}} and {{stacktrace}} variables. Pass null for default formatting:
      *      "{{header}}\n[code]: {{code}}\n[exception]: {{class}}\n[message]: {{message}}\n[stacktrace]:\n{{stacktrace}}".
      * @param ?int $maxExceptionMsgLength The maximum length of the exception message (the longer one will be truncated).
+     * @param bool $commandOutput If true, output from bash command tasks will be sent to stdout. Otherwise, it will be suppressed.
      * @param bool $defaultPreventOverlapping Determines if an overlapping task can be run launched.
      * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks).
      * @param int $defaultTries The number of attempts to execute the task in case of an error.
      * @param int $defaultTryDelay Delay before new try.
+     * @param bool $restartImmediately If true, failed task will be restarted without delay
      * @param int $minimumIntervalLength Minimum interval in minutes for task's addInterval method.
      *                                   ATTENTION: a low value can cause to skipped tasks, change at your own risk.
      * @throws Exception
@@ -144,6 +152,7 @@ class Config
         int             $defaultLockResetTimeout = 360,
         int             $defaultTries = 1,
         int             $defaultTryDelay = 0,
+        bool            $restartImmediately = false,
         int             $minimumIntervalLength = 30
     )
     {
@@ -185,6 +194,8 @@ class Config
             throw new Exception('The delay before new try must be greater than or equal to zero.');
         }
         $this->defaultTryDelay = $defaultTryDelay;
+
+        $this->restartImmediately = $restartImmediately;
 
         if ($minimumIntervalLength <= 0) {
             throw new Exception('The minimum interval must be greater than zero.');
@@ -336,6 +347,16 @@ class Config
     public function getDefaultTryDelay(): int
     {
         return $this->defaultTryDelay;
+    }
+
+    /**
+     * If true, the failed task will be restarted without delay for Every/Delay modes,
+     *  and at the same interval for Single mode (but only at the correct interval)
+     * @return bool
+     */
+    public function getRestartImmediately(): bool
+    {
+        return $this->restartImmediately;
     }
 
     /**
