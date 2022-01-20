@@ -296,7 +296,7 @@ class DatabaseLogging implements LockHandlerInterface
         $endTime = $endTime === null ? null : Carbon::parse($endTime);
         $isWorking = (bool)$this->getRowValue($launch, 'is_working');
         $errorCount = (int)$this->getRowValue($launch, 'error_count');
-        $errorText = (string)$this->getRowValue($launch, 'error_text');
+        $errorText = $this->getRowValue($launch, 'error_text');
 
         return new Launch($id, $taskId, $startTime, $endTime, $isWorking, $errorCount, $errorText);
     }

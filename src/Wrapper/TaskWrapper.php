@@ -109,6 +109,11 @@ class TaskWrapper
             return;
         }
 
+        if (!$lastLaunch->isWorking && $lastLaunch->errorCount !== 0) {
+            $this->logDebug("The previous launch failed after $lastLaunch->errorCount tries. Restart.");
+            $this->launchTask($startTime);
+            return;
+        }
 
         if ($cronMode === Mode::SINGLE && $this->cron->sameInterval($startTime, $lastLaunch->startTime)) {
             $delay = $startTime->diffInMinutes($lastLaunch->startTime);

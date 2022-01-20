@@ -22,13 +22,13 @@ class Launch
     private $taskId;
     /** @var Carbon */
     private $startTime;
-    /** @var ?Carbon */
+    /** @var Carbon|null */
     private $endTime;
     /** @var bool */
     private $isWorking;
     /** @var int */
     private $errorCount;
-    /** @var string */
+    /** @var string|null */
     private $errorText;
 
     public function __construct(
@@ -38,7 +38,7 @@ class Launch
         ?Carbon $endTime,
         bool    $isWorking,
         int     $errorCount,
-        string  $errorText
+        ?string  $errorText
     )
     {
         $this->id = $id;
