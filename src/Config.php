@@ -95,7 +95,7 @@ class Config
      *  and at the same interval for Single mode (but only at the correct interval)
      * @var bool
      */
-    private $restartImmediately;
+    private $restartAfterFail;
     /**
      * Minimum interval in minutes for task's addInterval method. It is made due to the fact that the scheduler
      * does not guarantee the start of the task at the exact time, and too small interval can lead to a missed task launch.
@@ -131,7 +131,7 @@ class Config
      * @param int $defaultLockResetTimeout Locking reset timeout in minutes (to prevent freezing tasks).
      * @param int $defaultTries The number of attempts to execute the task in case of an error.
      * @param int $defaultTryDelay Delay before new try.
-     * @param bool $restartImmediately If true, failed task will be restarted without delay
+     * @param bool $restartAfterFail If true, failed task will be restarted without delay
      * @param int $minimumIntervalLength Minimum interval in minutes for task's addInterval method.
      *                                   ATTENTION: a low value can cause to skipped tasks, change at your own risk.
      * @throws Exception
@@ -152,7 +152,7 @@ class Config
         int             $defaultLockResetTimeout = 360,
         int             $defaultTries = 1,
         int             $defaultTryDelay = 0,
-        bool            $restartImmediately = false,
+        bool            $restartAfterFail = false,
         int             $minimumIntervalLength = 30
     )
     {
@@ -195,7 +195,7 @@ class Config
         }
         $this->defaultTryDelay = $defaultTryDelay;
 
-        $this->restartImmediately = $restartImmediately;
+        $this->restartAfterFail = $restartAfterFail;
 
         if ($minimumIntervalLength <= 0) {
             throw new Exception('The minimum interval must be greater than zero.');
@@ -354,9 +354,9 @@ class Config
      *  and at the same interval for Single mode (but only at the correct interval)
      * @return bool
      */
-    public function getRestartImmediately(): bool
+    public function getRestartAfterFail(): bool
     {
-        return $this->restartImmediately;
+        return $this->restartAfterFail;
     }
 
     /**

@@ -109,7 +109,7 @@ class TaskWrapper
             return;
         }
 
-        if (!$lastLaunch->isWorking && $lastLaunch->errorCount !== 0 && $this->config->getRestartImmediately()) {
+        if (!$lastLaunch->isWorking && $lastLaunch->errorCount !== 0 && $this->config->getRestartAfterFail()) {
             $this->logDebug("The previous launch failed after $lastLaunch->errorCount tries. Restart.");
             $this->launchTask($startTime);
             return;
