@@ -216,7 +216,18 @@ class TaskWrapper
                 $header,
                 $e
             );
-            $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
+            try {
+                $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
+            }  catch (Throwable $e) {
+                $message = Formatter::exception(
+                    $this->config->getLogExceptionFormat(),
+                    $this->config->getMaxExceptionMsgLength(),
+                    $header,
+                    $e
+                );
+                $errors = $this->handler->completeLaunchUnsuccessfully($launchId, $message);
+            }
+
             if ($errors < $this->tries) {
                 $this->logDebug($message);
                 sleep($this->tryDelay);
@@ -551,7 +562,9 @@ class TaskWrapper
         if (array_key_exists($code, PhpErrors::FATAL)) {
             $errName = PhpErrors::FATAL[$code];
             throw new Exception("(ATTENTION: PHP $errName) - $message", $code);
-        } elseif ($this->config->getLogUncaughtErrors()) {
+        }
+
+        if ($this->config->getLogUncaughtErrors()) {
             $message = (PhpErrors::SOFT[$code] ?? 0) . " - $message (code $code, file $file, line $line)";
             $this->config->getLogWarningsToError() ?
                 $this->logError($message) :
